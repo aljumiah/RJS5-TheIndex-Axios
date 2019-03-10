@@ -1,6 +1,5 @@
 import React, { Component } from "react";
-
-import authors from "./data.js";
+import axios from "axios";
 
 // Components
 import Sidebar from "./Sidebar";
@@ -10,16 +9,45 @@ import AuthorDetail from "./AuthorDetail";
 class App extends Component {
   state = {
     currentAuthor: null,
-    filteredAuthors: authors
+    filteredAuthors: [],
+    authors: [],
+    loading: true
   };
 
-  selectAuthor = author => this.setState({ currentAuthor: author });
+  async componentDidMount() {
+    try {
+      let respons = await axios.get(
+        "https://the-index-api.herokuapp.com/api/authors/"
+      );
+      //console.log(respons.data);
+      this.setState({ authors: respons.data });
+      this.setState({ filteredAuthors: respons.data });
+      this.setState({ loading: false });
+    } catch (error) {
+      console.error(error);
+    }
+  }
+
+  selectAuthor = async author => {
+    try {
+      this.setState({ loading: true });
+      let respons = await axios.get(
+        `https://the-index-api.herokuapp.com/api/authors/${author.id}/`
+      );
+      this.setState({ loading: false, currentAuthor: respons.data });
+      //console.log(respons.data);
+    } catch (error) {
+      console.error(error);
+    }
+  };
+
+  //this.setState({ currentAuthor: author });
 
   unselectAuthor = () => this.setState({ currentAuthor: null });
 
   filterAuthors = query => {
     query = query.toLowerCase();
-    let filteredAuthors = authors.filter(author => {
+    let filteredAuthors = this.state.authors.filter(author => {
       return `${author.first_name} ${author.last_name}`
         .toLowerCase()
         .includes(query);
@@ -33,15 +61,16 @@ class App extends Component {
     } else {
       return (
         <AuthorsList
-          authors={this.state.filteredAuthors}
           selectAuthor={this.selectAuthor}
           filterAuthors={this.filterAuthors}
+          authors={this.state.authors}
         />
       );
     }
   };
 
   render() {
+    if (this.state.loading) return <div>loading ...</div>;
     return (
       <div id="app" className="container-fluid">
         <div className="row">

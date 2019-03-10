@@ -6,9 +6,10 @@ class AuthorDetail extends Component {
     const author = this.props.author;
     const authorName = `${author.first_name} ${author.last_name}`;
 
-    const books = author.books.map(book => (
-      <BookRow book={book} key={book.title} author={author} />
-    ));
+    const books = author.books.map(book => {
+      //console.log("[AuthorDetail.js]", book);
+      return <BookRow book={book} key={book.title} author={author} />;
+    });
 
     return (
       <div className="author col-xs-10">
